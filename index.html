@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>张钰锰 | AI产品经理，未来世界的建筑师</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- 
+        Chosen Palette: Futuristic Aesthetics (Graphite, Fluorescent Green, White)
+        Application Structure Plan: A single-page application with four main sections (Hero, Portfolio, About, Contact) navigated by a sticky header. The portfolio is interactive with filtering and modal pop-ups for project details. The 'About' section features an interactive skill chart. This structure provides a clear, linear narrative flow, guiding the recruiter through the user's story and skills efficiently.
+        Visualization & Content Choices: Hero: Dynamic text rotator for skills (Goal: Inform, Method: JS). Portfolio: Filterable grid of cards with modal pop-ups (Goal: Organize/Compare, Method: JS DOM manipulation). About: Radar chart for skills (Goal: Inform/Compare, Method: Chart.js Canvas). This approach uses interactive elements to engage the user and present complex information digestibly without leaving the single-page context.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+
+    <style>
+        body {
+            background-color: #2C2E3A;
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+        }
+        .font-header {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .accent-color {
+            color: #5AFF7E;
+        }
+        .bg-accent-color {
+            background-color: #5AFF7E;
+        }
+        .btn-primary {
+            background-color: #5AFF7E;
+            color: #2C2E3A;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px #5AFF7E, 0 0 10px #5AFF7E;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px #5AFF7E, 0 0 20px #5AFF7E;
+        }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #5AFF7E;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .portfolio-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .portfolio-card:hover {
+            transform: translateY(-10px) rotateX(5deg) rotateY(-5deg);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 20px #5AFF7E;
+            border-color: #5AFF7E;
+        }
+        .modal {
+            background-color: rgba(44, 46, 58, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        #dynamic-text {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: #5AFF7E;
+            margin: 1rem auto 0;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header / Navigation -->
+    <header id="main-header" class="bg-opacity-80 backdrop-blur-lg bg-[#2C2E3A] fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="#hero" class="text-2xl font-header font-bold">张钰锰</a>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#portfolio" class="nav-link text-lg">项目集</a>
+                    <a href="#about" class="nav-link text-lg">关于我</a>
+                    <a href="#contact" class="nav-link text-lg">联系方式</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="min-h-screen flex items-center justify-center text-center bg-cover bg-center" style="background-image: linear-gradient(rgba(44, 46, 58, 0.8), rgba(44, 46, 58, 1)), url('https://placehold.co/1920x1080/2C2E3A/FFFFFF?text=AI+%26+Arch');">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl md:text-6xl font-bold font-header leading-tight mb-4">AI产品经理，未来世界的建筑师</h1>
+                <p class="text-xl md:text-2xl mb-8">以跨界思维，构建AIGC与创意设计领域的智能产品</p>
+                <div class="h-16 text-lg md:text-xl mb-8 flex items-center justify-center">
+                    <span id="dynamic-text" class="accent-color font-medium">系统化思维</span>
+                </div>
+                <a href="#portfolio" class="btn-primary font-bold py-3 px-8 rounded-full text-lg inline-block">
+                    探索我的AIGC项目
+                </a>
+            </div>
+        </section>
+
+        <!-- Portfolio Section -->
+        <section id="portfolio" class="py-20 md:py-32">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title text-3xl md:text-4xl font-bold text-center mb-12 font-header">项目集</h2>
+                <div id="portfolio-filters" class="flex justify-center space-x-4 mb-12">
+                    <button class="filter-btn active px-4 py-2 rounded-md transition" data-filter="all">全部</button>
+                    <button class="filter-btn px-4 py-2 rounded-md transition" data-filter="aigc">AIGC与创意设计</button>
+                    <button class="filter-btn px-4 py-2 rounded-md transition" data-filter="classic">经典设计项目</button>
+                </div>
+                <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Portfolio items will be injected here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About Me Section -->
+        <section id="about" class="py-20 md:py-32 bg-white bg-opacity-5">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title text-3xl md:text-4xl font-bold text-center mb-12 font-header">关于我</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
+                    <div class="lg:col-span-3">
+                        <h3 class="text-2xl font-bold mb-4">从建筑到AI，我的跨界之旅</h3>
+                        <p class="text-lg leading-relaxed mb-4">
+                            我的职业旅程始于对物理空间的构想与创造。在西安交通大学与米兰理工大学的求学经历，以及作为建筑设计师的实践，让我深刻理解了如何将抽象的需求转化为具体的、服务于人的系统化方案。我习惯于从宏观的城市肌理思考到微观的节点设计，这种全流程、多维度的系统性思维，是我最宝贵的财富。
+                        </p>
+                        <p class="text-lg leading-relaxed">
+                            如今，我将这种热情与方法论投入到更广阔的数字世界。我相信，AI不应是冰冷的代码，而应是延伸人类创造力的工具，是构建未来智能体验的全新材料。我致力于将严谨的工科逻辑与充满人文关怀的设计学素养相结合，探索AIGC、智慧城市等领域，打造真正有价值、有温度的AI产品。
+                        </p>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="chart-container w-full max-w-md mx-auto h-80 md:h-96">
+                             <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 md:py-32 text-center">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title text-3xl md:text-4xl font-bold mb-8 font-header">联系我</h2>
+                <p class="text-xl mb-8">期待与您交流，共同探索AI产品的无限可能。</p>
+                <div class="flex justify-center items-center space-x-8 text-lg">
+                    <a href="mailto:zhangyumeng717@163.com" class="nav-link">邮箱: zhangyumeng717@163.com</a>
+                    <a href="https://www.linkedin.com" target="_blank" class="nav-link">领英 (LinkedIn)</a>
+                    <a href="https://github.com" target="_blank" class="nav-link">GitHub</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div id="project-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
+        <div id="modal-content" class="bg-[#2C2E3A] rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-8 relative border border-gray-700">
+            <button id="close-modal" class="absolute top-4 right-4 text-white text-3xl">&times;</button>
+            <img id="modal-image" src="" alt="Project Image" class="w-full h-64 object-cover rounded-lg mb-6">
+            <h3 id="modal-title" class="text-3xl font-bold mb-4 font-header"></h3>
+            <p id="modal-category" class="accent-color mb-4 text-lg"></p>
+            <div id="modal-description" class="text-lg leading-relaxed space-y-4"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Data ---
+            const portfolioData = [
+                {
+                    id: 1,
+                    title: 'AIGC创意设计辅助平台',
+                    category: 'AIGC与创意设计',
+                    image: 'https://placehold.co/600x400/5AFF7E/2C2E3A?text=AIGC+Platform',
+                    description: `
+                        <p><strong>项目背景:</strong> 传统设计流程中，建筑师与设计师在概念阶段耗费大量时间进行方案试错与可视化表达，创意产出效率受限。</p>
+                        <p><strong>产品方案:</strong> 本项目构想了一个AIGC平台，通过融合Stable Diffusion、ControlNet等多种模型，让设计师能通过简单的草图、文字描述或风格参考，快速生成高质量的概念图、效果图与设计变体。产品核心功能包括：文生图、图生图、风格迁移、以及基于参数化调整的方案优化。</p>
+                        <p><strong>跨领域协作:</strong> 作为产品经理，我负责定义产品需求（PRD），绘制用户旅程图，并与算法工程师探讨模型选型与优化方向，与UI/UX设计师共同打磨交互界面，确保工具的专业性与易用性。</p>
+                        <p><strong>成果展示:</strong> 最终产品旨在将设计师从重复性劳动中解放，使其更专注于创意本身，将设计周期缩短约30%。</p>
+                    `
+                },
+                {
+                    id: 2,
+                    title: '智慧城市数字孪生可视化系统',
+                    category: 'AIGC与创意设计',
+                    image: 'https://placehold.co/600x400/5AFF7E/2C2E3A?text=Digital+Twin',
+                    description: `
+                        <p><strong>项目背景:</strong> 城市管理者在进行规划决策时，缺乏直观、实时的数据反馈与模拟工具，难以评估方案影响。</p>
+                        <p><strong>产品方案:</strong> 设计一个基于数字孪生技术的城市可视化平台。该平台整合GIS数据、物联网传感器数据与城市建筑模型，利用AI算法进行交通流量预测、公共空间人流分析、突发事件模拟。用户可在三维场景中直观地进行交互，评估不同规划方案的优劣。</p>
+                        <p><strong>跨领域协作:</strong> 负责将复杂的城市规划需求转化为清晰的产品功能模块。与数据科学家合作定义数据接口与分析模型，与前端工程师协作实现三维场景的交互与数据可视化。</p>
+                    `
+                },
+                {
+                    id: 3,
+                    title: '老龄友好的疗愈社区设计',
+                    category: '经典设计项目',
+                    image: 'https://placehold.co/600x400/2C2E3A/FFFFFF?text=Healing+Community',
+                    description: `
+                        <p><strong>用户研究:</strong> 深入调研老年群体的生理、心理及社交需求，通过问卷与访谈，精准提炼出对安全性、便捷性、社交互动及精神慰藉的核心需求。</p>
+                        <p><strong>全流程管控:</strong> 作为项目主要负责人，主导了从市场研判、竞品分析、概念策划到方案设计、工程预算的全流程。确保设计理念与商业可行性高度统一。</p>
+                        <p><strong>人文关怀:</strong> 设计中充分融入无障碍设计、疗愈性景观、多功能活动空间等元素，旨在创造一个不仅满足基本生活需求，更能促进老年人身心健康的社区环境。此项目经验让我深刻理解了“以人为本”的设计原则，这与产品经理的用户中心思维异曲同工。</p>
+                    `
+                },
+                {
+                    id: 4,
+                    title: '乡村振兴研究型实践项目',
+                    category: '经典设计项目',
+                    image: 'https://placehold.co/600x400/2C2E3A/FFFFFF?text=Rural+Revitalization',
+                    description: `
+                        <p><strong>用户研究:</strong> 通过田野调查，完成千余份居民问卷收集，并深入访谈政府部门，精准提炼当地生活习惯与核心发展需求，为后续规划提供了坚实的数据支撑。这种严谨的需求诊断能力是产品经理工作的起点。</p>
+                        <p><strong>全流程管控:</strong> 作为子项负责人，协同多专业团队（规划、建筑、景观、结构）完成康养酒店的设计与施工图绘制，并独立编制近200页的研究文本，确保项目高效落地。展现了卓越的多任务协同处理与系统管控能力。</p>
+                    `
+                },
+            ];
+
+            const dynamicTextData = ['系统化思维', '设计驱动创新', '跨领域协作能力', '优秀表达能力'];
+
+            // --- Elements ---
+            const portfolioGrid = document.getElementById('portfolio-grid');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const dynamicTextEl = document.getElementById('dynamic-text');
+            const modal = document.getElementById('project-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            const mainHeader = document.getElementById('main-header');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            // --- Functions ---
+            const renderPortfolio = (filter = 'all') => {
+                portfolioGrid.innerHTML = '';
+                const filteredData = filter === 'all' ? portfolioData : portfolioData.filter(item => item.category.includes(filter));
+                
+                filteredData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'portfolio-card rounded-lg overflow-hidden cursor-pointer p-6';
+                    card.dataset.id = item.id;
+                    card.innerHTML = `
+                        <div class="relative h-48 mb-4">
+                            <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover rounded-md">
+                        </div>
+                        <h3 class="text-xl font-bold mb-2 font-header">${item.title}</h3>
+                        <p class="accent-color">${item.category}</p>
+                    `;
+                    portfolioGrid.appendChild(card);
+                });
+            };
+
+            const openModal = (id) => {
+                const project = portfolioData.find(p => p.id == id);
+                if (project) {
+                    document.getElementById('modal-image').src = project.image;
+                    document.getElementById('modal-title').textContent = project.title;
+                    document.getElementById('modal-category').textContent = project.category;
+                    document.getElementById('modal-description').innerHTML = project.description;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            };
+
+            const closeModal = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            };
+
+            let textIndex = 0;
+            const updateDynamicText = () => {
+                dynamicTextEl.style.opacity = 0;
+                setTimeout(() => {
+                    textIndex = (textIndex + 1) % dynamicTextData.length;
+                    dynamicTextEl.textContent = dynamicTextData[textIndex];
+                    dynamicTextEl.style.opacity = 1;
+                }, 500);
+            };
+            
+            const handleScroll = () => {
+                if (window.scrollY > 50) {
+                    mainHeader.classList.add('shadow-lg');
+                } else {
+                    mainHeader.classList.remove('shadow-lg');
+                }
+
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 60) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            // --- Event Listeners ---
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active', 'bg-accent-color', 'text-gray-900'));
+                    btn.classList.add('active', 'bg-accent-color', 'text-gray-900');
+                    renderPortfolio(btn.dataset.filter);
+                });
+            });
+
+            portfolioGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.portfolio-card');
+                if (card) {
+                    openModal(card.dataset.id);
+                }
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            window.addEventListener('scroll', handleScroll);
+
+            // --- Initializations ---
+            renderPortfolio();
+            setInterval(updateDynamicText, 3000);
+            
+            // Skills Chart
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(90, 255, 126, 0.6)');
+            gradient.addColorStop(1, 'rgba(90, 255, 126, 0.2)');
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['产品管理', '设计思维', '技术理解', '软实力'],
+                    datasets: [{
+                        label: '能力图谱',
+                        data: [90, 95, 80, 95],
+                        backgroundColor: gradient,
+                        borderColor: '#5AFF7E',
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#5AFF7E',
+                        pointHoverBackgroundColor: '#5AFF7E',
+                        pointHoverBorderColor: '#FFFFFF'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { 
+                                font: { size: 14, family: "'Inter', sans-serif" },
+                                color: '#FFFFFF'
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                stepSize: 25
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
